@@ -46,13 +46,32 @@
                 background-color: black;
                 width: 24px;
             }
+            .note_container_func{
+                width:100%;
+                height: 28px;
+                /* Firefox */
+                display:-moz-box;
+                -moz-box-pack:center;
+                -moz-box-align:center;
+
+                /* Safari and Chrome */
+                display:-webkit-box;
+                -webkit-box-pack:center;
+                -webkit-box-align:center;
+
+                /* W3C */
+                display:box;
+                box-pack:center;
+                box-align:center;               
+            }
 
             .button{ 
                 border: none;
                 margin-left: 0px;
                 width: 24px;    
                 height: 24px;    
-                background-color:transparent;                
+                background-color:transparent; 
+                vertical-align: middle;
             }
 
             .arrow_right{
@@ -61,9 +80,16 @@
 
             .arrow_left{
                 background-image: url(css/images/frecciaOUT.png);
-            }         
+            }       
+            .folder{
+                background-size:20px 20px;
+                background-repeat:no-repeat;
+                background-image: url(css/images/folder.png);
+            }
             .delete{
-                background-image: url(css/images/delete-26.png);                
+                width: 28px;    
+                height: 28px;  
+                background-image: url(css/images/elemina.png);                
             }
             .search{
                 width: 30px;
@@ -92,6 +118,7 @@
                 width: 100%;
                 margin-left: 0px;
                 margin-bottom: 2px;
+                height: 20px;
             }
             .note_container_button{
                 border: none;
@@ -99,11 +126,11 @@
                 box-shadow: 3px 3px 3px 2px black; 
                 margin-left: 100px;
                 margin-bottom: 0px;
+                height: 28px;
             }
             .note{
                 box-shadow: 3px 3px 3px 2px white;
                 background-color: white;
-                width: 240px;
                 padding-left: 5px;
                 height: 70px;
                 margin-bottom: 5px;
@@ -118,7 +145,6 @@
                 position: relative;
                 margin-left: 34px;
                 margin-top: -34px;
-                width: 190px;
             }
 
             .note_image{
@@ -130,12 +156,10 @@
                 font-family: Constantia, "Lucida Bright", "DejaVu Serif", Georgia, serif;
                 font-size:70%;
                 margin-left: 45px;
-                width: 190px;
                 margin-top: -37px;
 
             }
             .note_nome{
-
                 font-family: Constantia, "Lucida Bright", "DejaVu Serif", Georgia, serif;
                 font-size:80%;
                 margin-top: 15px;
@@ -153,7 +177,6 @@
             .alert{
                 box-shadow: 3px 3px 3px 2px white;
                 background-color: white;
-                width: 240px;
                 padding-left: 5px;
                 height: 70px;
                 margin-bottom: 5px;
@@ -166,6 +189,7 @@
                 text-align: center;
                 width: 100%;
                 margin-left: 0px;
+                height:20px;
             }
             .calendar {
                 margin: .25em 10px 10px 0;
@@ -335,6 +359,7 @@
                 margin-top: 0px;
                 vertical-align:middle;
                 position: absolute;
+                margin-left: 5px;
             }             
         </style>
     </head>
@@ -366,9 +391,10 @@
         <div class ="note_alert" id="note_alert">
             <!--*********************************NOTE*********************************-->
             <div class="note_container_title"> NOTE </div>            
-            <div class="note_container"></div>
             <div class="note_container_func">
-                <button class="delete note_container_button" id="delete_note"></button>
+                <button class="arrow_left button" id="note_before"></button>                
+                <button class="delete button" id="delete_note"></button>
+                <button class="arrow_right button" id="note_next"></button>
             </div>
             <!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
@@ -394,7 +420,7 @@
                     <th>Titolare</th>
                     <th>Scadenza autorizzazione</th>
                     <th>Materiale cavato</th>
-                    <th>Link</th>  
+                    <th></th>  
                 </tr>
             </thead>
         </table> 
@@ -440,80 +466,30 @@
     <script>
         var mapVisible;
         var noteAlertVisible;
+
         $(document).ready(function() {
-            $.ajax({
-                url: '<%=request.getContextPath()%>/NoteServlet?action=fetchData',
-                dataType: 'json',
-                data: {
-                    length: 10
-                },
-                success: function(response) {
+            NoteOffset = 0;
+            LoadNote('<%=request.getContextPath()%>', true);
+            LoadAlert('<%=request.getContextPath()%>');
 
-                    for (i = 0; i < response.result.length; i++) {
-                        var str = "<div class=\"note\" id=\"" + response.result[i].idNota + "\">";
-                        str = str + "<img src=\"css/images/nota.png\" class=\"note_image\">";
-                        str = str + "<div class=\"note_text\">" + response.result[i].descrizione + "</div>";
-                        str = str + "<div class=\"note_nome\">" + response.result[i].nome + " " + response.result[i].cognome + "</div>";
-                        str = str + "<div class=\"note_data\">" + response.result[i].data_creazione.split(" ")[0] + "</div>";
-                        str = str + "</div>";
-                        $(".note_container").append(str);
-                        $("#" + response.result[i].idNota).click(function() {
-                            var myClass = $(this).attr("class");
-                            if (myClass.indexOf("highlight") === -1) {
-                                $(this).addClass("highlight");
-                            } else {
-                                $(this).removeClass("highlight");
-                            }
-                        });
-                    }
-                },
-                fail: function(response) {
-                }
 
-            });
-            $.ajax({
-                url: '<%=request.getContextPath()%>/AlertServlet?action=fetchData',
-                dataType: 'json',
-                data: {
-                },
-                success: function(response) {
-                    for (i = 0; i < response.result.length; i++) {
-                        var date = response.result[i].istante.split(" ");
-                        var str = "<div class=\"alert\" id=\"" + response.result[i].idAlert + "\">";
-                        str = str + "<p class=\"calendar\">" + date[0].split("-")[2] + "<em>" + date[0].split("-")[1] + " " + date[0].split("-")[0] + "</em></p>";
-                        str = str + "<div class=\"alert_text\">" + response.result[i].descrizione + "</div>";
-                        str = str + "</div>";
-                        $(".alert_container").append(str);
-                    }
-                },
-                fail: function(response) {
-                }
 
-            });
-            var source = new EventSource('<%=request.getContextPath()%>/NoteServlet?action=checkNewNote&length=10');
-            source.onmessage = function(event) {
-                var JSONData = JSON.parse(event.data).result;
-                for (i = 0; i < JSONData.length; i++) {
-                    if ($(".note_container").find("#" + JSONData[i].idNota).length === 0) {
-                        var str = "<div class=\"note\" id=\"" + JSONData[i].idNota + "\">";
-                        str = str + "<img src=\"css/images/nota.png\" class=\"note_image\">";
-                        str = str + "<div class=\"note_text\">" + JSONData[i].descrizione + "</div>";
-                        str = str + "<div class=\"note_nome\">" + JSONData[i].nome + " " + JSONData[i].cognome + "</div>";
-                        str = str + "<div class=\"note_data\">" + JSONData[i].data_creazione.split(" ")[0] + "</div>";
-                        str = str + "</div>";
-                        $(".note_container").append(str);
-                        $("#" + JSONData[i].idNota).click(function() {
-                            var myClass = $(this).attr("class");
-                            if (myClass.indexOf("highlight") === -1) {
-                                $(this).addClass("highlight");
-                            } else {
-                                $(this).removeClass("highlight");
-                            }
-                        });
-                    }
-                }
-            };
         });
+
+        $("#note_next").click(function() {
+            NoteOffset = NoteOffset + 3;
+            LoadNote('<%=request.getContextPath()%>', false);
+
+        });
+
+        $("#note_before").click(function() {
+            NoteOffset = NoteOffset - 3;
+            if (NoteOffset < 0)
+                NoteOffset = 0;
+            LoadNote('<%=request.getContextPath()%>', false);
+
+        });
+
         $("#delete_note").click(function() {
 
             var arrayNote = $(".note_container").find(".note");
@@ -587,7 +563,12 @@
                 "oLanguage": {"sSearch": "<div class=\"search button\"></div>"},
                 "aoColumnDefs": [
                     {"bSortable": false,
-                        "aTargets": [0, 5]}
+                        "aTargets": [0, 5]},
+                    {"aTargets": [5],
+                        "mData": null,
+                        "mRender": function(data, type, full) {
+                            return '<button class="folder button" id="show_cava_sezione"></button>';
+                        }}
                 ],
                 "aoColumns": [
                     {"mDataProp": "codiceMadre"},
@@ -628,7 +609,6 @@
                         }
                         tmp = tmp.substring(0, tmp.length - 1);
                         tmp = tmp + ']}';
-                        console.log(tmp);
                         vector_layer.removeAllFeatures();
                         if (display) {
                             vector_layer.addFeatures(geojson_format.read(tmp));
@@ -639,6 +619,7 @@
                                     ), 13);
                         }
                         fnCallback(json);
+                        $("#show_cava_sezione").click(ShowCava);
                     }).fail(function(jqxhr, textStatus, error) {
                         var err = textStatus + ", " + error;
                         console.log("Request Failed: " + err);
@@ -650,6 +631,8 @@
             });
             $(".dataTables_filter").appendTo(".Header");
 
+            
+            
             $("#table_id tbody").click(function(event) {
                 if ($(event.target.parentNode).hasClass('row_selected')) {
                     $(event.target.parentNode).removeClass('row_selected');
@@ -665,6 +648,7 @@
                     }
                 }
             });
+            
         });
 
         //MAP!!!!!
@@ -717,6 +701,14 @@
             }
         });
 
+        function ShowCava(){
+            $(".sezione").empty();
+            
+            
+            
+            
+            
+        };
     </script>
     <!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 </body>

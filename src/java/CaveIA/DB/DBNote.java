@@ -96,13 +96,14 @@ public class DBNote {
         
     }
      
-    public static LinkedList LoadBySessionAndNull(String session,int number, Connection oconn) throws SQLException{
+    public static LinkedList LoadBySessionAndNull(String session,int number,int offset, Connection oconn) throws SQLException{
     
         Connection conn = oconn == null ? DB.getConn() : oconn;
-        String sql = "(SELECT u.nome, u.cognome, n.id_nota, n.data_creazione, n.descrizione, n.titolo from utenti AS u right outer join (select * from note where (id_utente =(select id_utente from utenti where ultima_sessione = ?) or id_utente is null) and not cancellato) AS n on (u.id_utente = n.id_utente)) order by id_nota desc limit ?";
+        String sql = "(SELECT u.nome, u.cognome, n.id_nota, n.data_creazione, n.descrizione, n.titolo from utenti AS u right outer join (select * from note where (id_utente =(select id_utente from utenti where ultima_sessione = ?) or id_utente is null) and not cancellato) AS n on (u.id_utente = n.id_utente)) order by id_nota desc limit ? OFFSET ?";
         doLoadById = conn.prepareStatement(sql);
         doLoadById.setString(1, session);
         doLoadById.setInt(2, number);
+        doLoadById.setInt(3,offset);
         ResultSet rs = doLoadById.executeQuery();
         LinkedList<Note> ret = new LinkedList();
         while(rs.next()){

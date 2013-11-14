@@ -135,7 +135,8 @@
 
             div.footer_description{
                 margin-top: 0px;
-                vertical-align:middle;   
+                vertical-align:middle;
+                margin-left: 5px;
             }            
 
         </style>

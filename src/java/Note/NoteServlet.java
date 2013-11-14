@@ -40,6 +40,7 @@ public class NoteServlet extends HttpServlet {
         
         
         int length;
+        int offset;
         List<Note> note;
         String json;
         
@@ -51,8 +52,9 @@ public class NoteServlet extends HttpServlet {
                 response.setHeader("Cache-Control", "no-cache");
                 json = "{\"result\": [";
                 length = Integer.parseInt(request.getParameter("length"));
+                offset = Integer.parseInt(request.getParameter("offset"));
                 
-                note = DBNote.LoadBySessionAndNull(request.getSession().getId(), length, null);
+                note = DBNote.LoadBySessionAndNull(request.getSession().getId(), length,offset, null);
 
                 for (int i = 0; i < note.size(); i++) {
                     json = json + "{";
@@ -78,6 +80,7 @@ public class NoteServlet extends HttpServlet {
                 response.setHeader("Cache-Control", "no-cache");
                 String[] tmp = request.getParameterValues("idNote[]");
                 length = Integer.parseInt(request.getParameter("length"));
+                offset = Integer.parseInt(request.getParameter("offset"));
                 json = "{\"result\": [";
                 Long[] tmpLong = new Long[tmp.length];
                 for (int i = 0; i < tmp.length; i++) {
@@ -85,7 +88,7 @@ public class NoteServlet extends HttpServlet {
                 }
                 DBNote.DeleteNoteById(tmpLong, null);
                 
-                note = DBNote.LoadBySessionAndNull(request.getSession().getId(), length, null);
+                note = DBNote.LoadBySessionAndNull(request.getSession().getId(), length,offset, null);
 
                 for (int i = 0; i < note.size(); i++) {
                     json = json + "{";
@@ -104,38 +107,7 @@ public class NoteServlet extends HttpServlet {
                 json = json + "]}";
                 response.getWriter().write(json);
                 break;
-                
-            case "checkNewNote":
-
-                response.setContentType("text/event-stream;charset=utf-8");
-                response.setHeader("Cache-Control", "no-cache");
-                
-                json = "{\"result\": [";
-                length = Integer.parseInt(request.getParameter("length"));
-                note = DBNote.LoadBySessionAndNull(request.getSession().getId(), length,null);
-
-                for (int i = 0; i < note.size(); i++) {
-                    json = json + "{";
-                    json = (note.get(i).getIdNota()== null) ? (json + "\"idNota\": 0 , ") : (json + "\"idNota\": " + note.get(i).getIdNota().toString() + ", ");
-                    json = (note.get(i).getNome()== null) ? (json + "\"nome\": \"\" , ") : (json + "\"nome\": " + "\"" + note.get(i).getNome()+ "\"" + ", ");
-                    json = (note.get(i).getCognome()== null) ? (json + "\"cognome\": \"\" , ") : (json + "\"cognome\": " + "\"" + note.get(i).getCognome()+ "\"" + ", ");
-                    json = (note.get(i).getDescrizione() == null) ? (json + "\"descrizione\": \"\" , ") : (json + "\"descrizione\": " + "\"" + note.get(i).getDescrizione() + "\"" + ", ");
-                    json = (note.get(i).getDataCreazione() == null) ? (json + "\"data_creazione\": 0 , ") : (json + "\"data_creazione\": " + "\"" + note.get(i).getDataCreazione() + "\"" + ", ");
-                    json = (note.get(i).getTitolo() == null) ? (json + "\"titolo\": \"\" ") : (json + "\"titolo\": " + "\"" + note.get(i).getTitolo() + "\"");
-                    if (i == note.size() - 1) {
-                        json = json + "}";
-                    } else {
-                        json = json + "},";
-                    }
-                }
-
-                json = json + "]}";                
-                
-                String out = "retry: 10000\n\n";
-                out = out + "data: " + json + "\n\n";                
-                
-                response.getWriter().write(out);
-                break;                
+                            
         }
         
         
