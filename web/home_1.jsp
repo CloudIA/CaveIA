@@ -65,6 +65,32 @@
                 box-align:center;               
             }
 
+            .Proprieta_cava{
+                float:left;
+                width: 40%;
+                height: 300px;
+                background-color: red;
+            }
+
+            .categorie_docuementi{
+                float:left;
+                width: 60%;
+                height: 300px;
+                background-color: blue;                
+
+            }
+            .cambio_vista{
+                width: 100%;
+                height: 30px;
+                position:relative;
+                background-color: pink;  
+            }
+            .documenti{
+                clear:left;
+                width:100%;
+                height:255px;
+                background-color: yellow;
+            }
             .button{ 
                 border: none;
                 margin-left: 0px;
@@ -360,7 +386,70 @@
                 vertical-align:middle;
                 position: absolute;
                 margin-left: 5px;
-            }             
+            }   
+            #tabs{
+                
+                overflow: hidden;
+                width: 100%;
+                margin: 8px 0px 1px -3px;
+                padding: 0;
+                list-style: none;
+            }
+
+            #tabs li{
+                float: left;
+                margin: 0 .5em 0 0;
+            }
+
+            .vista{
+                position: relative;
+                margin-left: 8px;
+                background-color: #000;
+                padding: .3em 3.7em;
+                float: left;
+                text-decoration: none;
+                color: #fff;
+            }
+
+
+            .vista:focus{
+                outline: 0;
+            }
+
+            .vista::after{
+                content: '';
+                position: absolute;
+                z-index: 1;
+                top: 0;
+                right: -.5em;
+                bottom: 0;
+                width: 1em;
+                background-color: #000;
+                -moz-box-shadow: 2px 2px 2px rgba(0,0,0,.4);
+                -webkit-box-shadow: 2px 2px 2px rgba(0,0,0,.4);
+                box-shadow: 2px 2px 2px rgba(0,0,0,.4);
+                -webkit-transform: skew(10deg);
+                -moz-transform: skew(10deg);
+                -ms-transform: skew(10deg);
+                -o-transform: skew(10deg);
+                transform: skew(10deg);
+                -webkit-border-radius: 0 5px 0 0;
+                -moz-border-radius: 0 5px 0 0;
+                border-radius: 0 5px 0 0;
+            }
+
+
+
+            #content
+            {
+                background: #fff;
+                padding: 2em;
+                height: 220px;
+                position: relative;
+                z-index: 2;	
+                border-radius: 0 5px 5px 5px;
+                box-shadow: 0 -2px 3px -2px rgba(0, 0, 0, .5);
+            }
         </style>
     </head>
     <body>
@@ -411,22 +500,18 @@
 
     <!--*********************************SEZIONE*********************************-->
     <div class="sezione">
-        <!--*********************************ANAGRAFICA TABLE*********************************-->
-        <table id="table_id" class="display" width="100%">
-            <thead>
-                <tr>
-                    <th>Codice Cava Madre</th>
-                    <th>Codice Cava</th>
-                    <th>Titolare</th>
-                    <th>Scadenza autorizzazione</th>
-                    <th>Materiale cavato</th>
-                    <th></th>  
-                </tr>
-            </thead>
-        </table> 
-        <!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+        <ul id="tabs">
+            <li><a href="#" class="vista">Vista 1</a></li>
+            <li><a href="#" class="vista">Vista 2</a></li>
+            <li><a href="#" class="vista">Vista 3</a></li>
+            <li><a class="button arrow_left" id="arrow_left"><img src="css/images/frecciaOUT.png" border="0"></a></li>
+        </ul>
 
-
+        <div id="content"> 
+            <div id="tab1">...</div>
+            <div id="tab2">...</div>
+            <div id="tab3">...</div>
+        </div>
 
     </div>
     <!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
@@ -545,173 +630,7 @@
 
             });
         });
-        var oTable;
-        var TableData;
-        var minLat;
-        var minLon;
-        var maxLat;
-        var maxLon;
-        $(document).ready(function() {
 
-            oTable = $('#table_id').dataTable({
-                "bSortClasses": false,
-                "bProcessing": true,
-                "bServerSide": true,
-                "bPaginate": false,
-                "bInfo": false,
-                "sDom": 'r<iflp>',
-                "oLanguage": {"sSearch": "<div class=\"search button\"></div>"},
-                "aoColumnDefs": [
-                    {"bSortable": false,
-                        "aTargets": [0, 5]},
-                    {"aTargets": [5],
-                        "mData": null,
-                        "mRender": function(data, type, full) {
-                            return '<button class="folder button" id="show_cava_sezione"></button>';
-                        }}
-                ],
-                "aoColumns": [
-                    {"mDataProp": "codiceMadre"},
-                    {"mDataProp": "codiceCava"},
-                    {"mDataProp": "ragioneSociale"},
-                    {"mDataProp": "fineVal"},
-                    {"mDataProp": "materiale"},
-                    {"mData": null}
-                ],
-                "oTableTools": {
-                    "sRowSelect": "single"
-                },
-                "sAjaxSource": "/CaveIA/CaveServlet?action=fetchData",
-                "fnRowCallback": function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
-                    $(nRow).attr("id", TableData.aaData[iDisplayIndex].idCava);
-                    return nRow;
-                },
-                "fnServerData": function(sSource, aoData, fnCallback) {
-                    var jqxhr = $.getJSON(sSource, aoData, function(json) {
-                        TableData = json;
-                        display = false;
-                        var tmp = "";
-                        for (i = 0; i < TableData.aaData.length; i++) {
-                            if (tmp === "")
-                                tmp = '{"type": "FeatureCollection", "features": [';
-                            if (TableData.aaData[i].geometry !== "") {
-                                for (j = 0; j < TableData.aaData[i].geometry[0].coordinates.length; j++) {
-                                    minLat = (TableData.aaData[i].geometry[0].coordinates[0][j][1] > minLat) ? minLat : TableData.aaData[i].geometry[0].coordinates[0][j][1];
-                                    minLon = (TableData.aaData[i].geometry[0].coordinates[0][j][0] > minLon) ? minLon : TableData.aaData[i].geometry[0].coordinates[0][j][0];
-                                    maxLat = (TableData.aaData[i].geometry[0].coordinates[0][j][1] < maxLat) ? maxLat : TableData.aaData[i].geometry[0].coordinates[0][j][1];
-                                    maxLon = (TableData.aaData[i].geometry[0].coordinates[0][j][0] < maxLon) ? maxLon : TableData.aaData[i].geometry[0].coordinates[0][j][0];
-                                }
-                                var string = JSON.stringify(TableData.aaData[i].geometry);
-                                string = string.substring(1, string.length - 1);
-                                tmp = tmp + '{"type": "Feature", "id": "' + TableData.aaData[i].idCava + '", "properties": {"name": "' + TableData.aaData[i].codiceCava + '"},"geometry":' + string + '},';
-                                display = true;
-                            }
-                        }
-                        tmp = tmp.substring(0, tmp.length - 1);
-                        tmp = tmp + ']}';
-                        vector_layer.removeAllFeatures();
-                        if (display) {
-                            vector_layer.addFeatures(geojson_format.read(tmp));
-                            map.setCenter(
-                                    new OpenLayers.LonLat((maxLon + minLon) / 2, minLat).transform(
-                                    new OpenLayers.Projection("EPSG:4326"),
-                                    map.getProjectionObject()
-                                    ), 13);
-                        }
-                        fnCallback(json);
-                        $("#show_cava_sezione").click(ShowCava);
-                    }).fail(function(jqxhr, textStatus, error) {
-                        var err = textStatus + ", " + error;
-                        console.log("Request Failed: " + err);
-                    });
-                }
-
-
-
-            });
-            $(".dataTables_filter").appendTo(".Header");
-
-            
-            
-            $("#table_id tbody").click(function(event) {
-                if ($(event.target.parentNode).hasClass('row_selected')) {
-                    $(event.target.parentNode).removeClass('row_selected');
-                    for (i = 0; i < vector_layer.features.length; i++) {
-                        if (vector_layer.features[i].fid === $(event.target.parentNode).attr('id'))
-                            selectControl.unselect(vector_layer.features[i]);
-                    }
-                } else {
-                    $(event.target.parentNode).addClass('row_selected');
-                    for (i = 0; i < vector_layer.features.length; i++) {
-                        if (vector_layer.features[i].fid === $(event.target.parentNode).attr('id'))
-                            selectControl.select(vector_layer.features[i]);
-                    }
-                }
-            });
-            
-        });
-
-        //MAP!!!!!
-        map = new OpenLayers.Map({div: "map", controls: [new OpenLayers.Control.Navigation()]});
-        var layer = new OpenLayers.Layer.Stamen("toner");
-
-
-        var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
-        renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
-
-        var geojson_format = new OpenLayers.Format.GeoJSON({'internalProjection': new OpenLayers.Projection("EPSG:900913"), 'externalProjection': new OpenLayers.Projection("EPSG:4326")});
-
-        var vector_layer = new OpenLayers.Layer.Vector("Layer 1", {
-            renderers: renderer,
-            styleMap: new OpenLayers.StyleMap({
-                "default": new OpenLayers.Style(OpenLayers.Util.applyDefaults({
-                    fillColor: "red",
-                    strokeColor: "red"
-                }, OpenLayers.Feature.Vector.style["default"])),
-                "select": new OpenLayers.Style(OpenLayers.Util.applyDefaults({
-                    fillColor: "#99CCFF",
-                    strokeColor: "#AACCFF"
-
-                }, OpenLayers.Feature.Vector.style["select"]))
-            })
-        });
-        map.addLayers([layer, vector_layer]);
-        map.removeControl(OpenLayers.Control.PanZoom)
-        selectControl = new OpenLayers.Control.SelectFeature(
-                [vector_layer],
-                {
-                    clickout: false,
-                    toggle: true,
-                    multiple: false,
-                    hover: false,
-                    multipleKey: "shiftKey" // shift key adds to selection
-                }
-        );
-        map.addControl(selectControl);
-        selectControl.activate();
-
-        vector_layer.events.on({
-            "featureselected": function(e) {
-                parentNode = $("tbody").find("tr#" + e.feature.fid);
-                parentNode.addClass('row_selected');
-            },
-            "featureunselected": function(e) {
-                parentNode = $("tbody").find("tr#" + e.feature.fid);
-                parentNode.removeClass('row_selected');
-            }
-        });
-        var sezione_lista_cave;
-        var mappa_lista_cave;
-        function ShowCava(){
-            sezione_lista_cave = $(".sezione").clone();
-            mappa_lista_cave = $(".left_panel").clone();
-            $(".sezione").empty();
-            $(".left_panel").empty();
-            
-            
-            
-            
-        };
     </script>
     <!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 </body>

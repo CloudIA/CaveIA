@@ -19,7 +19,7 @@ public class DB {
     public static Connection getConn() {
         try {
             Class.forName("org.postgresql.Driver");
-            return DriverManager.getConnection("jdbc:postgresql://192.168.88.138:5432/caveia", "postgres", "CloudIA2013");
+            return DriverManager.getConnection("jdbc:postgresql://192.168.88.139:5432/caveia", "postgres", "CloudIA2013");
         } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
             return null;
