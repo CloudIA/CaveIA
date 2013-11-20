@@ -66,8 +66,8 @@ function ItemPositioning() {
         $('.sezione').width($(window).width() - $('.div_button_left').width() - $('.div_button_right').width());
         $('.div_button_right').css("left", window_width - $('.div_button_right').width());
     }
-      
-    numberOfNote=Math.floor(($('.note_alert').height() - $('.note_container_func').height() - $('.note_container_title').height() - $('.alert_container_title').height() - 10) / 140);
+
+    numberOfNote = Math.floor(($('.note_alert').height() - $('.note_container_func').height() - $('.note_container_title').height() - $('.alert_container_title').height() - 10) / 140);
 }
 
 function Positioning() {
@@ -79,19 +79,19 @@ function Positioning() {
 }
 
 function ShowNoteAlert() {
-    $('.div_button_right .arrow_left,.div_button_left .arrow_right').css("marginTop", ($('.div_button_left').height() - 32) / 2);
+
     if (noteAlertVisible === false) {
         $('.div_button_left').animate({left: '+=' + $('.note_alert').css('width')}, 300);
         $('.sezione').animate({left: '+=' + $('.note_alert').css('width'), width: '-=' + $('.note_alert').css('width')}, 300);
         $('.note_alert').show('slide', {direction: 'left'}, 300);
-        $('#show_note_alert').switchClass("arrow_right", "arrow_left");
+        $("#show_note_alert img").attr('src', 'css/images/frecciaOUT.png');
         noteAlertVisible = true;
 
     } else {
         $('.div_button_left').animate({left: '-=' + $('.note_alert').css('width')}, 300);
         $('.sezione').animate({left: '-=' + $('.note_alert').css('width'), width: '+=' + $('.note_alert').css('width')}, 300);
         $('.note_alert').hide('slide', {direction: 'left'}, 300);
-        $('#show_note_alert').switchClass("arrow_left", "arrow_right");
+        $("#show_note_alert img").attr('src', 'css/images/frecciaIN.png');
         noteAlertVisible = false;
     }
 }
@@ -102,7 +102,8 @@ function ShowMap() {
         $('.div_button_right').animate({left: '-=' + $('.left_panel').css('width')}, 300);
         $('.sezione').animate({width: '-=' + $('.left_panel').css('width')}, 300);
         $('.left_panel').show('slide', {direction: 'right'}, 300, showHide(new Array(0, 3, 4)));
-        $('#show_map').switchClass("arrow_left", "arrow_right");
+        $("#show_map img").attr('src', 'css/images/frecciaIN.png')
+
 
         mapVisible = true;
 
@@ -110,7 +111,7 @@ function ShowMap() {
         $('.div_button_right').animate({left: '+=' + $('.left_panel').css('width')}, 300);
         $('.sezione').animate({width: '+=' + $('.left_panel').css('width')}, 300);
         $('.left_panel').hide('slide', {direction: 'right'}, 300, showHide(new Array(0, 3, 4)));
-        $('#show_map').switchClass("arrow_right", "arrow_left");
+        $("#show_map img").attr('src', 'css/images/frecciaOUT.png')
         mapVisible = false;
     }
 
@@ -127,7 +128,7 @@ function showHide(iCol) {
 }
 var NoteOffset;
 var numberOfNote;
-function LoadNote(ContextPath,reload) {
+function LoadNote(ContextPath, reload) {
     $.ajax({
         url: ContextPath + '/NoteServlet?action=fetchData',
         dataType: 'json',
@@ -137,24 +138,25 @@ function LoadNote(ContextPath,reload) {
         },
         success: function(response) {
             $(".note_container").remove();
-            if($('.note_container').length===0) $('.note_container_title').after("<div class=\"note_container\"></div>");
+            if ($('.note_container').length === 0)
+                $('.note_container_title').after("<div class=\"note_container\"></div>");
             $('.note_container').height(($('.note_alert').height() - $('.note_container_func').height() - $('.note_container_title').height() - $('.alert_container_title').height() - 10) / 2);
             for (i = 0; i < response.result.length; i++) {
-                    var str = "<div class=\"note\" id=\"" + response.result[i].idNota + "\">";
-                    str = str + "<img src=\"css/images/nota.png\" class=\"note_image\">";
-                    str = str + "<div class=\"note_text\">" + response.result[i].descrizione + "</div>";
-                    str = str + "<div class=\"note_nome\">" + response.result[i].nome + " " + response.result[i].cognome + "</div>";
-                    str = str + "<div class=\"note_data\">" + response.result[i].data_creazione.split(" ")[0] + "</div>";
-                    str = str + "</div>";
-                    $(".note_container").append(str);
-                    $("#" + response.result[i].idNota).click(function() {
-                        var myClass = $(this).attr("class");
-                        if (myClass.indexOf("highlight") === -1) {
-                            $(this).addClass("highlight");
-                        } else {
-                            $(this).removeClass("highlight");
-                        }
-                    });
+                var str = "<div class=\"note\" id=\"" + response.result[i].idNota + "\">";
+                str = str + "<img src=\"css/images/nota.png\" class=\"note_image\">";
+                str = str + "<div class=\"note_text\">" + response.result[i].descrizione + "</div>";
+                str = str + "<div class=\"note_nome\">" + response.result[i].nome + " " + response.result[i].cognome + "</div>";
+                str = str + "<div class=\"note_data\">" + response.result[i].data_creazione.split(" ")[0] + "</div>";
+                str = str + "</div>";
+                $(".note_container").append(str);
+                $("#" + response.result[i].idNota).click(function() {
+                    var myClass = $(this).attr("class");
+                    if (myClass.indexOf("highlight") === -1) {
+                        $(this).addClass("highlight");
+                    } else {
+                        $(this).removeClass("highlight");
+                    }
+                });
 
             }
 
@@ -163,7 +165,8 @@ function LoadNote(ContextPath,reload) {
             console.log(response);
         },
         complete: function(response) {
-            if(reload) setTimeout(LoadNote, 10000, ContextPath,reload);
+            if (reload)
+                setInterval(LoadNote, 10000, ContextPath, reload);
         }
 
     });
@@ -191,3 +194,8 @@ function LoadAlert(ContextPath) {
 
     });
 }
+
+
+
+
+

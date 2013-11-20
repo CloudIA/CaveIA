@@ -80,32 +80,13 @@ public class NoteServlet extends HttpServlet {
                 response.setHeader("Cache-Control", "no-cache");
                 String[] tmp = request.getParameterValues("idNote[]");
                 length = Integer.parseInt(request.getParameter("length"));
-                offset = Integer.parseInt(request.getParameter("offset"));
-                json = "{\"result\": [";
                 Long[] tmpLong = new Long[tmp.length];
                 for (int i = 0; i < tmp.length; i++) {
                     tmpLong[i] =  Long.parseLong(tmp[i]);
                 }
                 DBNote.DeleteNoteById(tmpLong, null);
-                
-                note = DBNote.LoadBySessionAndNull(request.getSession().getId(), length,offset, null);
 
-                for (int i = 0; i < note.size(); i++) {
-                    json = json + "{";
-                    json = (note.get(i).getIdNota()== null) ? (json + "\"idNota\": 0 , ") : (json + "\"idNota\": " + note.get(i).getIdNota().toString() + ", ");
-                    json = (note.get(i).getNome()== null) ? (json + "\"nome\": \"\" , ") : (json + "\"nome\": " + "\"" + note.get(i).getNome()+ "\"" + ", ");
-                    json = (note.get(i).getCognome()== null) ? (json + "\"cognome\": \"\" , ") : (json + "\"cognome\": " + "\"" + note.get(i).getCognome()+ "\"" + ", ");
-                    json = (note.get(i).getDescrizione() == null) ? (json + "\"descrizione\": \"\" , ") : (json + "\"descrizione\": " + "\"" + note.get(i).getDescrizione() + "\"" + ", ");
-                    json = (note.get(i).getDataCreazione() == null) ? (json + "\"data_creazione\": 0 , ") : (json + "\"data_creazione\": " + "\"" + note.get(i).getDataCreazione() + "\"" + ", ");
-                    json = (note.get(i).getTitolo() == null) ? (json + "\"titolo\": \"\" ") : (json + "\"titolo\": " + "\"" + note.get(i).getTitolo() + "\"");
-                    if (i == note.size() - 1) {
-                        json = json + "}";
-                    } else {
-                        json = json + "},";
-                    }
-                }                
-                json = json + "]}";
-                response.getWriter().write(json);
+                response.getWriter().write("{}");
                 break;
                             
         }
